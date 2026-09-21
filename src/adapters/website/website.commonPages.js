@@ -1,0 +1,48 @@
+// Guessed paths for common company pages. These are candidates only —
+// the crawler still has to fetch them, and a 404 is recorded, not skipped.
+const COMMON_PATHS = [
+  "/",
+  "/about",
+  "/about-us",
+  "/company",
+  "/product",
+  "/products",
+  "/solution",
+  "/solutions",
+  "/service",
+  "/services",
+  "/industry",
+  "/industries",
+  "/customer",
+  "/customers",
+  "/case-study",
+  "/case-studies",
+  "/pricing",
+  "/platform",
+  "/features",
+  "/use-cases",
+  "/partners",
+  "/integrations",
+  "/blog",
+  "/news",
+  "/press",
+  "/careers",
+  "/jobs",
+  "/team",
+  "/leadership",
+  "/contact",
+  "/contact-us",
+  "/resources",
+  "/docs",
+  "/faq",
+  "/terms",
+  "/terms-of-service",
+  "/terms-and-conditions",
+  "/privacy",
+  "/privacy-policy",
+  "/legal",
+];
+
+export function buildCommonPageUrls(baseUrl) {
+  return COMMON_PATHS.map((path) => new URL(path, baseUrl).toString());
+}

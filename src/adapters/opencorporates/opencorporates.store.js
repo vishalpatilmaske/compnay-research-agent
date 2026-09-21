@@ -1,0 +1,22 @@
+import fs from "fs/promises";
+import path from "path";
+
+// Writes the raw OpenCorporates lookup result to disk as-is, unmodified, so
+// it can always be traced back to when validating a claim later (mirrors
+// sec.store.js / mca.store.js / website.store.js).
+export async function saveRawOpenCorporatesData(data, outputDir = "data/opencorporates") {
+  await fs.mkdir(outputDir, { recursive: true });
+
+  const slug =
+    (data.query?.companyName || data.query?.companyNumber || "company")
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "") || "company";
+  const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+  const filePath = path.join(outputDir, `${slug}-${timestamp}.json`);
+
+  await fs.writeFile(filePath, JSON.stringify(data, null, 2), "utf-8");
+
+  return filePath;
+}
