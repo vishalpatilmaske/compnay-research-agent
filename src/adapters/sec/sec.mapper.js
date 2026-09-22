@@ -75,6 +75,27 @@ export function mapSubmissions(raw) {
   return { company, filings };
 }
 
+// submissions.json has no officer/executive field at all — the only free
+// way to get real exec names from SEC is to read an actual filing that
+// discloses them. DEF 14A (annual proxy) is the best one: Item 10 of
+// Schedule 14A requires naming executive officers and directors. Falls back
+// to an annual report form when no proxy is on file (smaller/newer filers
+// often don't file DEF 14A), preferring the most recent filing of whichever
+// form is available. Returns null if the filer has neither.
+const OFFICER_FILING_FORM_PRIORITY = ["DEF 14A", "10-K", "10-K405", "20-F", "40-F"];
+
+export function pickOfficerFiling(filings) {
+  const recent = filings?.recent || [];
+
+  for (const form of OFFICER_FILING_FORM_PRIORITY) {
+    const matches = recent
+      .filter((f) => f.form === form && f.primaryDocument)
+      .sort((a, b) => (a.filingDate < b.filingDate ? 1 : -1));
+    if (matches.length > 0) return matches[0];
+  }
+  return null;
+}
+
 // A small, documented set of common us-gaap concepts — not every filer has
 // every concept (or any at all), so each is read defensively and left null
 // rather than guessed. Only the most recent value (by `end` date) per

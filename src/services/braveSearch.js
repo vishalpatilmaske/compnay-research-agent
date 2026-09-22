@@ -1,10 +1,10 @@
-export async function braveSearch(query, { count = 10 } = {}) {
+export async function braveSearch(query, { count = 10, country = "IN" } = {}) {
   const url =
     "https://api.search.brave.com/res/v1/web/search?" +
     new URLSearchParams({
       q: query,
       count: String(count),
-      country: "IN",
+      country,
       search_lang: "en",
     });
 

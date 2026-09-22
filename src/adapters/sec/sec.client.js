@@ -3,6 +3,7 @@ import axios from "axios";
 const SUBMISSIONS_BASE_URL = "https://data.sec.gov/submissions";
 const COMPANY_FACTS_BASE_URL = "https://data.sec.gov/api/xbrl/companyfacts";
 const COMPANY_TICKERS_URL = "https://www.sec.gov/files/company_tickers.json";
+const ARCHIVES_BASE_URL = "https://www.sec.gov/Archives/edgar/data";
 
 const REQUEST_TIMEOUT = 15000;
 const MAX_RETRIES = 3;
@@ -118,6 +119,22 @@ export async function fetchCompanyFacts(cik) {
   const url = `${COMPANY_FACTS_BASE_URL}/CIK${normalizeCikForUrl(cik)}.json`;
   const response = await requestWithRetry(url);
   return response.data;
+}
+
+// https://www.sec.gov/Archives/edgar/data/{cik}/{accession}/{document} — an
+// individual filing document (e.g. a DEF 14A proxy statement or 10-K),
+// fetched as raw HTML/text. Unlike submissions/companyFacts this has no
+// fixed schema; the caller (sec.officerEvidence.js) strips it to plain text
+// itself. The Archives path uses the CIK *without* leading zeros and the
+// accession number *without* dashes — both different from every other SEC
+// URL this client builds, per SEC's own documented Archives layout.
+export async function fetchFilingDocument(cik, accessionNumber, primaryDocument) {
+  const cikNoLeadingZeros = String(cik).replace(/\D/g, "").replace(/^0+/, "") || "0";
+  const accessionNoDashes = String(accessionNumber).replace(/-/g, "");
+  const url = `${ARCHIVES_BASE_URL}/${cikNoLeadingZeros}/${accessionNoDashes}/${primaryDocument}`;
+
+  const response = await requestWithRetry(url);
+  return { url, html: response.data };
 }
 
 // https://www.sec.gov/files/company_tickers.json — SEC's official bulk
